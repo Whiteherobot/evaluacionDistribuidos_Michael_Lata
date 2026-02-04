@@ -69,10 +69,10 @@ spec:
               name: redis-credentials
               key: redis-password
         command:
-        - redis-server
-        - /etc/redis/redis.conf
-        - --requirepass
-        - $(REDIS_PASSWORD)
+        - sh
+        - -c
+        - |
+          exec redis-server /etc/redis/redis.conf --requirepass "$REDIS_PASSWORD"
         volumeMounts:
         - name: redis-data
           mountPath: /data

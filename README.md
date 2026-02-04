@@ -135,3 +135,16 @@ Cada registro de sensor se almacena en Redis con el siguiente formato JSON:
 ```
 
 Los datos se almacenan en una lista de Redis con la clave `sensor:data`.
+
+## Arquitectura - Tabla de Tecnologías Seleccionadas
+
+| Componente | Tecnología | Imagen | Justificación |
+|------------|-----------|--------|--------------|
+| Base de Datos | Redis | redis:7-alpine | BD NoSQL en memoria con persistencia AOF y autenticación nativa. Ideal para datos volátiles de alta velocidad con latencia sub-milisegundo. |
+| Productor | Python + Redis Client | python:3.11-alpine | Imagen ligera que genera datos de sensores cada 3 segundos con autenticación automática inyectada vía Secret. |
+| Cliente Web | Flask | python:3.11-alpine | Interfaz web simple para visualizar datos en tabla HTML con auto-actualización cada 3 segundos. |
+| Orquestación | Kubernetes | Minikube | Gestión de contenedores con auto-recuperación de fallos, PersistentVolumeClaim para durabilidad y Secrets para credenciales. |
+| Almacenamiento | PersistentVolume | Local | Volumen de 1Gi que garantiza persistencia de datos incluso tras eliminación del pod Redis. |
+| Networking | Services | ClusterIP + NodePort | Conectividad interna entre componentes y exposición externa en puerto 30081. |
+
+Resultado de Prueba de Resiliencia: Luego de eliminar manualmente el Pod de Redis, Kubernetes lo reconstruyó automáticamente y los 798 registros almacenados persistieron correctamente en el volumen, demostrando la robustez del sistema.
